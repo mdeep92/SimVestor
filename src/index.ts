@@ -55,18 +55,13 @@ class Game {
 }
 
 // --- MVP Feature: Fictional Companies ---
-type Company = {
-    name: string;
-    price: number;
-    roe: number; // Return on Equity
-    fcf: number; // Free Cash Flow
-};
+import { Company, Sector } from './models/companies';
 
 const companies: Company[] = [
-    { name: 'TechNova', price: 100, roe: 0.15, fcf: 500000 },
-    { name: 'GreenCore', price: 80, roe: 0.12, fcf: 300000 },
-    { name: 'FinEdge', price: 120, roe: 0.18, fcf: 700000 },
-    { name: 'HealthPlus', price: 90, roe: 0.10, fcf: 250000 },
+    { name: 'TechNova', price: 100, roe: 0.15, fcf: 500000, sector: 'Technology' },
+    { name: 'GreenCore', price: 80, roe: 0.12, fcf: 300000, sector: 'Energy' },
+    { name: 'FinEdge', price: 120, roe: 0.18, fcf: 700000, sector: 'Finance' },
+    { name: 'HealthPlus', price: 90, roe: 0.10, fcf: 250000, sector: 'Healthcare' },
 ];
 
 // --- MVP Feature: Simulated News Feed ---

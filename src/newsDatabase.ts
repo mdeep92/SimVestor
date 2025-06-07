@@ -113,4 +113,4 @@ export const newsDatabase: NewsItem[] = [
         headline: 'Global trade tensions impact markets',
         impact: (companies) => companies.forEach(c => c.price *= 0.97)
     }
-];
+] satisfies NewsItem[];
