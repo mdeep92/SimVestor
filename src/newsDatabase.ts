@@ -1,47 +1,116 @@
 // src/newsDatabase.ts
 
+import { Company, Sector } from './models/companies';
+
 export type NewsItem = {
     headline: string;
-    impact: (companies: any[]) => void;
+    impact: (companies: Company[]) => void;
+    sector?: Sector;
 };
 
-// Example news database (expand as needed)
+// Utility function to impact sector stocks
+const impactSector = (companies: Company[], sector: Sector, percentage: number) => {
+    companies
+        .filter(c => c.sector === sector)
+        .forEach(c => {
+            c.price = c.price * (1 + percentage);
+        });
+};
+
 export const newsDatabase: NewsItem[] = [
+    // Technology Sector News
     {
-        headline: 'TechNova launches breakthrough AI chip!',
-        impact: (companies) => { companies[0].price += 10; }
+        headline: 'New AI breakthrough boosts tech sector!',
+        impact: (companies) => impactSector(companies, 'Technology', 0.08),
+        sector: 'Technology'
     },
     {
-        headline: 'GreenCore faces regulatory hurdles.',
-        impact: (companies) => { companies[1].price -= 8; }
+        headline: 'Global chip shortage affects tech companies',
+        impact: (companies) => impactSector(companies, 'Technology', -0.06),
+        sector: 'Technology'
     },
     {
-        headline: 'FinEdge reports record profits.',
-        impact: (companies) => { companies[2].price += 12; }
+        headline: 'Major cybersecurity concerns hit tech stocks',
+        impact: (companies) => impactSector(companies, 'Technology', -0.09),
+        sector: 'Technology'
+    },
+
+    // Healthcare Sector News
+    {
+        headline: 'Breakthrough in medical research boosts healthcare stocks',
+        impact: (companies) => impactSector(companies, 'Healthcare', 0.07),
+        sector: 'Healthcare'
     },
     {
-        headline: 'HealthPlus recalls product line.',
-        impact: (companies) => { companies[3].price -= 7; }
-    },
-    // Add more news items here for a richer game experience
-    {
-        headline: 'Market optimism boosts all stocks.',
-        impact: (companies) => { companies.forEach(c => c.price += 5); }
+        headline: 'Healthcare policy changes impact sector',
+        impact: (companies) => impactSector(companies, 'Healthcare', -0.05),
+        sector: 'Healthcare'
     },
     {
-        headline: 'Economic downturn hits tech sector.',
-        impact: (companies) => { companies[0].price -= 15; }
+        headline: 'New pandemic concerns affect healthcare stocks',
+        impact: (companies) => impactSector(companies, 'Healthcare', 0.12),
+        sector: 'Healthcare'
+    },
+
+    // Finance Sector News
+    {
+        headline: 'Interest rate hike benefits financial sector',
+        impact: (companies) => impactSector(companies, 'Finance', 0.06),
+        sector: 'Finance'
     },
     {
-        headline: 'GreenCore wins sustainability award.',
-        impact: (companies) => { companies[1].price += 10; }
+        headline: 'Banking regulations tighten globally',
+        impact: (companies) => impactSector(companies, 'Finance', -0.04),
+        sector: 'Finance'
+    },
+
+    // Energy Sector News
+    {
+        headline: 'Renewable energy breakthrough boosts green stocks',
+        impact: (companies) => impactSector(companies, 'Energy', 0.09),
+        sector: 'Energy'
     },
     {
-        headline: 'FinEdge faces fraud investigation.',
-        impact: (companies) => { companies[2].price -= 20; }
+        headline: 'Oil price volatility affects energy sector',
+        impact: (companies) => impactSector(companies, 'Energy', -0.07),
+        sector: 'Energy'
+    },
+
+    // Consumer Sector News
+    {
+        headline: 'Strong holiday sales boost retail stocks',
+        impact: (companies) => impactSector(companies, 'Consumer', 0.05),
+        sector: 'Consumer'
     },
     {
-        headline: 'HealthPlus develops new vaccine.',
-        impact: (companies) => { companies[3].price += 14; }
+        headline: 'Consumer confidence drops sharply',
+        impact: (companies) => impactSector(companies, 'Consumer', -0.06),
+        sector: 'Consumer'
+    },
+
+    // Industrial Sector News
+    {
+        headline: 'Manufacturing activity surges',
+        impact: (companies) => impactSector(companies, 'Industrial', 0.07),
+        sector: 'Industrial'
+    },
+    {
+        headline: 'Supply chain issues hit industrial sector',
+        impact: (companies) => impactSector(companies, 'Industrial', -0.05),
+        sector: 'Industrial'
+    },
+
+    // Market-wide News
+    {
+        headline: 'Market optimism boosts all stocks',
+        impact: (companies) => companies.forEach(c => c.price *= 1.03)
+    },
+    {
+        headline: 'Economic recession fears hit market',
+        impact: (companies) => companies.forEach(c => c.price *= 0.95)
+    },
+    {
+        headline: 'Global trade tensions impact markets',
+        impact: (companies) => companies.forEach(c => c.price *= 0.97)
     }
 ];
