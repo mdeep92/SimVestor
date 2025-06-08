@@ -1,6 +1,8 @@
 import React from 'react';
 import { Company } from '../models/companies';
 import { Pie } from 'react-chartjs-2';
+import { BiTrendingUp, BiTrendingDown } from 'react-icons/bi';
+import { Portfolio, PortfolioViewProps, HoldingData } from '../types/portfolio';
 import {
   Chart as ChartJS,
   ArcElement,
@@ -10,20 +12,8 @@ import {
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-interface PortfolioViewProps {
-  portfolio: {
-    cash: number;
-    holdings: { company: Company; shares: number }[];
-  };
-  companies: Company[];
-  setPortfolio: React.Dispatch<React.SetStateAction<{
-    cash: number;
-    holdings: { company: Company; shares: number }[];
-  }>>;
-}
-
 const PortfolioView: React.FC<PortfolioViewProps> = ({ portfolio, companies, setPortfolio }) => {
-  const sellStock = (holding: { company: Company; shares: number }) => {
+  const sellStock = (holding: HoldingData) => {
     const shares = Number(prompt(`How many shares of ${holding.company.name} do you want to sell?`));
     if (isNaN(shares) || shares <= 0 || shares > holding.shares) {
       alert('Invalid number of shares!');
@@ -104,27 +94,41 @@ const PortfolioView: React.FC<PortfolioViewProps> = ({ portfolio, companies, set
         <p>No stocks in portfolio. Visit the Market to start investing!</p>
       ) : (
         <table>
-          <thead>
-            <tr>
-              <th>Company</th>
-              <th>Shares</th>
-              <th>Current Price</th>
-              <th>Total Value</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {portfolio.holdings.map(holding => (
-              <tr key={holding.company.name}>
-                <td>{holding.company.name}</td>
-                <td>{holding.shares}</td>
-                <td>${holding.company.price.toFixed(2)}</td>
-                <td>${(holding.shares * holding.company.price).toFixed(2)}</td>
-                <td>
-                  <button onClick={() => sellStock(holding)}>Sell</button>
-                </td>
+          <thead>              <tr>
+                <th>Company</th>
+                <th>Shares</th>
+                <th>Avg. Buy Price</th>
+                <th>Current Price</th>
+                <th>Total Value</th>
+                <th>Gain/Loss</th>
+                <th>Action</th>
               </tr>
-            ))}
+            </thead>
+            <tbody>
+              {portfolio.holdings.map(holding => {
+                const avgBuyPrice = holding.avgBuyPrice || holding.company.price;
+                const gainLoss = ((holding.company.price - avgBuyPrice) / avgBuyPrice) * 100;
+                return (
+                  <tr key={holding.company.name}>
+                    <td>{holding.company.name}</td>
+                    <td>{holding.shares}</td>
+                    <td>${avgBuyPrice.toFixed(2)}</td>
+                    <td>${holding.company.price.toFixed(2)}</td>
+                    <td>${(holding.shares * holding.company.price).toFixed(2)}</td>
+                    <td className={`${gainLoss >= 0 ? 'text-green-600' : 'text-red-600'} font-semibold`}>
+                      <span className="flex items-center gap-1">
+                        {gainLoss >= 0 ? <BiTrendingUp /> : <BiTrendingDown />}
+                        {gainLoss.toFixed(2)}%
+                      </span>
+                    </td>
+                    <td>
+                      <button onClick={() => sellStock(holding)} className="px-3 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded transition-colors duration-200">
+                        Sell
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
           </tbody>
         </table>
       )}

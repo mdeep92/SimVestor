@@ -1,31 +1,49 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Company } from '../models/companies';
 import { companies } from '../models/companies';
 import { newsDatabase } from '../newsDatabase';
 import { PriceEngine } from '../models/priceEngine';
+import { Portfolio, HoldingData } from '../types/portfolio';
 import MarketView from './MarketView';
 import NewsView from './NewsView';
 import PortfolioView from './PortfolioView';
 import ReturnsView from './ReturnsView';
 import HowToPlay from './HowToPlay';
+import Screener from './Screener';
+import CompanyDetail from './CompanyDetail';
+import QuarterlyReportModal from './QuarterlyReportModal';
 import ProtectedRoute from './ProtectedRoute';
 import { useAuth } from '../contexts/AuthContext';
-import { BiLogOut, BiTrendingUp, BiNews, BiWallet, BiLineChart, BiRightArrowAlt, BiInfoCircle } from 'react-icons/bi';
+import { BiLogOut, BiTrendingUp, BiNews, BiWallet, BiLineChart, BiRightArrowAlt, BiInfoCircle, BiFilter } from 'react-icons/bi';
 
-type TabType = 'howto' | 'market' | 'news' | 'portfolio' | 'returns';
+
+type TabType = 'howto' | 'market' | 'news' | 'portfolio' | 'returns' | 'screener';
+
+interface ViewState {
+  view: 'screener' | 'detail';
+  selectedCompany: Company | null;
+}
 
 const App: React.FC = () => {
   const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<TabType>('howto');
   const [week, setWeek] = useState(1);
   const [newsHistory, setNewsHistory] = useState<string[]>([]);
-  const [portfolio, setPortfolio] = useState({
-    cash: 1000,
-    holdings: [] as { company: typeof companies[0], shares: number }[]
+  const [portfolio, setPortfolio] = useState<Portfolio>({
+    cash: 10000,
+    holdings: []
   });
   const [weeklyReturns, setWeeklyReturns] = useState<{ week: number; value: number }[]>([
-    { week: 0, value: 1000 } // Initial investment
+    { week: 0, value: 10000 }
   ]);
+  const [viewState, setViewState] = useState<ViewState>({ 
+    view: 'screener', 
+    selectedCompany: null 
+  });
+  const [quarterStartValue, setQuarterStartValue] = useState(10000);
+  const [showQuarterlyReport, setShowQuarterlyReport] = useState(false);
+  const [lastReportWeek, setLastReportWeek] = useState(0);
   
   const [priceEngine] = useState(() => new PriceEngine(0.02)); // 2% base volatility
 
@@ -44,6 +62,35 @@ const App: React.FC = () => {
       portfolio.holdings.reduce((sum, h) => sum + (h.company.price * h.shares), 0);
     setWeeklyReturns(prev => [...prev, { week: week, value: totalValue }]);
   };
+
+  // Calculate average buy prices for quarterly report
+  const getHoldingsWithAvgPrice = (): HoldingData[] => {
+    return portfolio.holdings.map(holding => ({
+      ...holding,
+      avgBuyPrice: holding.avgBuyPrice || holding.company.price
+    }));
+  };
+
+  useEffect(() => {
+    const currentQuarter = Math.floor(week / 12);
+    const previousQuarter = Math.floor(lastReportWeek / 12);
+    
+    if (currentQuarter > previousQuarter && week > 0) {
+      const totalValue = portfolio.cash + 
+        portfolio.holdings.reduce((sum, h) => sum + (h.company.price * h.shares), 0);
+      setShowQuarterlyReport(true);
+      setLastReportWeek(week);
+    }
+  }, [week, lastReportWeek]);
+
+  // Effect to update quarter start value
+  useEffect(() => {
+    if (week % 12 === 0) {
+      const totalValue = portfolio.cash + 
+        portfolio.holdings.reduce((sum, h) => sum + (h.company.price * h.shares), 0);
+      setQuarterStartValue(totalValue);
+    }
+  }, [week, portfolio]);
 
   return (
     <ProtectedRoute>
@@ -71,6 +118,12 @@ const App: React.FC = () => {
               className={activeTab === 'market' ? 'active' : ''}
             >
               <BiTrendingUp /> Market
+            </button>
+            <button 
+              onClick={() => setActiveTab('screener')} 
+              className={activeTab === 'screener' ? 'active' : ''}
+            >
+              <BiFilter /> Screener
             </button>
             <button 
               onClick={() => setActiveTab('news')} 
@@ -105,78 +158,8 @@ const App: React.FC = () => {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.2 }}
-                className="how-to-play-tab"
               >
-                <div className="card">
-                  <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                    <BiInfoCircle className="text-primary" />
-                    How to Play Simvestor
-                  </h2>
-
-                  <div className="space-y-6">
-                    <section>
-                      <h3 className="text-xl font-semibold mb-2">Game Overview</h3>
-                      <p>
-                        Simvestor is a stock market simulation game where you can practice investing
-                        without risking real money. Start with $1,000 and build your portfolio
-                        by buying and selling stocks across different sectors.
-                      </p>
-                    </section>
-
-                    <section>
-                      <h3 className="text-xl font-semibold mb-2">Game Mechanics</h3>
-                      <ul className="list-disc pl-6 space-y-2">
-                        <li>The game progresses week by week</li>
-                        <li>Each week brings new market news that affects stock prices</li>
-                        <li>News can impact specific sectors or the entire market</li>
-                        <li>Stock prices change based on news and market volatility</li>
-                        <li>Track your portfolio's performance and returns over time</li>
-                      </ul>
-                    </section>
-
-                    <section>
-                      <h3 className="text-xl font-semibold mb-2">Features</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="feature-card">
-                          <h4><BiTrendingUp /> Market View</h4>
-                          <p>Browse and buy stocks from different sectors</p>
-                        </div>
-                        <div className="feature-card">
-                          <h4><BiNews /> News Feed</h4>
-                          <p>Stay updated with market news and their impacts</p>
-                        </div>
-                        <div className="feature-card">
-                          <h4><BiWallet /> Portfolio</h4>
-                          <p>Manage your holdings and track investments</p>
-                        </div>
-                        <div className="feature-card">
-                          <h4><BiLineChart /> Returns</h4>
-                          <p>Analyze your performance with charts and metrics</p>
-                        </div>
-                      </div>
-                    </section>
-
-                    <section>
-                      <h3 className="text-xl font-semibold mb-2">Getting Started</h3>
-                      <ol className="list-decimal pl-6 space-y-2">
-                        <li>Click on the Market tab to view available stocks</li>
-                        <li>Use your initial $1,000 to buy your first stocks</li>
-                        <li>Monitor news events that might affect your investments</li>
-                        <li>Track your portfolio's performance in the Returns tab</li>
-                        <li>Buy low and sell high to maximize your returns!</li>
-                      </ol>
-                    </section>
-
-                    <div className="mt-6">
-                      <button
-                        onClick={() => setActiveTab('market')}
-                        className="px-4 py-2 bg-primary text-white rounded hover:bg-secondary transition"
-                      >
-                        Let's Start Investing!
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                <HowToPlay isOpen={true} onClose={() => setActiveTab('market')} />
               </motion.div>
             )}
             {activeTab === 'market' && (
@@ -192,6 +175,34 @@ const App: React.FC = () => {
                   portfolio={portfolio}
                   setPortfolio={setPortfolio}
                 />
+              </motion.div>
+            )}
+            {activeTab === 'screener' && (
+              <motion.div
+                key="screener"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.2 }}
+              >
+                {viewState.view === 'screener' ? (
+                  <Screener
+                    companies={companies}
+                    portfolio={portfolio}
+                    setPortfolio={setPortfolio}
+                    onCompanySelect={(company: Company) => 
+                      setViewState({ view: 'detail', selectedCompany: company })}
+                  />
+                ) : (
+                  <CompanyDetail
+                    company={viewState.selectedCompany!}
+                    onBack={() => setViewState({ view: 'screener', selectedCompany: null })}
+                    onBuy={(company) => {
+                      setActiveTab('market');
+                      // You might want to trigger the buy dialog in MarketView here
+                    }}
+                  />
+                )}
               </motion.div>
             )}
             {activeTab === 'news' && (
@@ -240,6 +251,18 @@ const App: React.FC = () => {
             )}
           </AnimatePresence>
         </main>
+
+        <QuarterlyReportModal
+          isOpen={showQuarterlyReport}
+          onClose={() => setShowQuarterlyReport(false)}
+          weekNumber={week}
+          portfolioValueStart={quarterStartValue}
+          portfolioValueEnd={
+            portfolio.cash + 
+            portfolio.holdings.reduce((sum, h) => sum + (h.company.price * h.shares), 0)
+          }
+          holdings={getHoldingsWithAvgPrice()}
+        />
       </div>
     </ProtectedRoute>
   );

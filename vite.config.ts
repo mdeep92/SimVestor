@@ -7,5 +7,13 @@ export default defineConfig({
   base: '/SimVestor/',  // for GitHub Pages deployment
   optimizeDeps: {
     include: ['chart.js', 'react-chartjs-2']
-  }
+  },
+  css: {
+    postcss: {
+      plugins: [
+        require('tailwindcss'),
+        require('autoprefixer'),
+      ],
+    },
+  },
 })

@@ -73,15 +73,35 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin = true }) => {
 
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
       className="auth-container"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
     >
-      <div className="auth-form-container">
-        <h2>{isLogin ? 'Sign In' : 'Sign Up'}</h2>
-        {error && <div className="auth-error">{error}</div>}
-        
-        <form onSubmit={handleSubmit} className="auth-form">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="auth-layout"
+      >
+        <div className="auth-image" />
+        <motion.div 
+          className="auth-form-container"
+          initial={{ x: 20, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
+          <h2 className="text-3xl font-bold mb-4">
+            {isLogin ? 'Welcome Back!' : 'Create Account'}
+          </h2>
+          <p className="text-gray-600 mb-6">
+            {isLogin 
+              ? 'Sign in to continue your investing journey' 
+              : 'Start your investing journey with Simvestor'}
+          </p>
+          
+          {error && <div className="auth-error mb-6">{error}</div>}
+          
+          <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
             <label htmlFor="email">Email</label>
             <input
@@ -171,7 +191,8 @@ const AuthForm: React.FC<AuthFormProps> = ({ isLogin = true }) => {
             </>
           )}
         </p>
-      </div>
+        </motion.div>
+      </motion.div>
     </motion.div>
   );
 };

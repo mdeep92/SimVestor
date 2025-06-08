@@ -6,7 +6,7 @@ class Player {
     name: string;
     balance: number;
 
-    constructor(name: string, startingBalance: number = 1000) {
+    constructor(name: string, startingBalance: number = 10000) {
         this.name = name;
         this.balance = startingBalance;
     }
@@ -58,10 +58,10 @@ class Game {
 import { Company, Sector } from './models/companies';
 
 const companies: Company[] = [
-    { name: 'TechNova', price: 100, roe: 0.15, fcf: 500000, sector: 'Technology' },
-    { name: 'GreenCore', price: 80, roe: 0.12, fcf: 300000, sector: 'Energy' },
-    { name: 'FinEdge', price: 120, roe: 0.18, fcf: 700000, sector: 'Finance' },
-    { name: 'HealthPlus', price: 90, roe: 0.10, fcf: 250000, sector: 'Healthcare' },
+    { name: 'TechNova', price: 100, roe: 0.15, fcf: 500000, sector: 'Technology', marketCap: 5000000, peRatio: 20, revenue: 1000000, profit: 200000, assets: 3000000, debt: 1000000, employees: 500, yearFounded: 2010 },
+    { name: 'GreenCore', price: 80, roe: 0.12, fcf: 300000, sector: 'Energy', marketCap: 4000000, peRatio: 15, revenue: 800000, profit: 150000, assets: 2500000, debt: 800000, employees: 400, yearFounded: 2012 },
+    { name: 'FinEdge', price: 120, roe: 0.18, fcf: 700000, sector: 'Finance', marketCap: 6000000, peRatio: 25, revenue: 1200000, profit: 250000, assets: 3500000, debt: 1200000, employees: 600, yearFounded: 2008 },
+    { name: 'HealthPlus', price: 90, roe: 0.10, fcf: 250000, sector: 'Healthcare', marketCap: 3500000, peRatio: 18, revenue: 900000, profit: 180000, assets: 2800000, debt: 900000, employees: 450, yearFounded: 2015 },
 ];
 
 // --- MVP Feature: Simulated News Feed ---
@@ -75,7 +75,7 @@ type PortfolioEntry = {
 
 class Portfolio {
     entries: PortfolioEntry[] = [];
-    cash: number = 1000;
+    cash: number = 10000;
 
     buy(company: Company, shares: number) {
         const cost = company.price * shares;

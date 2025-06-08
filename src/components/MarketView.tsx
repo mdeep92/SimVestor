@@ -1,107 +1,64 @@
 import React, { useState } from 'react';
 import { Company } from '../models/companies';
 import { BiDollar, BiPurchaseTag, BiTrendingUp, BiTrendingDown } from 'react-icons/bi';
-import { Dialog, Transition } from '@headlessui/react';
 import { motion } from 'framer-motion';
-
-interface MarketViewProps {
-  companies: Company[];
-  portfolio: {
-    cash: number;
-    holdings: { company: Company; shares: number }[];
-  };
-  setPortfolio: React.Dispatch<React.SetStateAction<{
-    cash: number;
-    holdings: { company: Company; shares: number }[];
-  }>>;
-}
-
-interface ShareInputDialogProps {
-  isOpen: boolean;
-  company: Company | null;
-  onClose: () => void;
-  onConfirm: (shares: number) => void;
-}
-
-const ShareInputDialog: React.FC<ShareInputDialogProps> = ({ isOpen, company, onClose, onConfirm }) => {
-  const [shares, setShares] = useState('');
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const numShares = Number(shares);
-    if (numShares > 0) {
-      onConfirm(numShares);
-      setShares('');
-    }
-  };
-
-  return (
-    <Transition show={isOpen} as={React.Fragment}>
-      <Dialog onClose={onClose} className="share-input-overlay">
-        <Transition.Child
-          enter="ease-out duration-300"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-in duration-200"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
-          <Dialog.Panel className="share-input-dialog">
-            <div className="share-input-content">
-              <Dialog.Title>
-                Buy {company?.name} Shares
-              </Dialog.Title>
-              <form onSubmit={handleSubmit} className="share-input-form">
-                <input
-                  type="number"
-                  className="share-input"
-                  value={shares}
-                  onChange={(e) => setShares(e.target.value)}
-                  placeholder="Number of shares"
-                  min="1"
-                  autoFocus
-                />
-                <div className="action-buttons">
-                  <button type="button" onClick={onClose}>Cancel</button>
-                  <button type="submit" className="buy-button">Buy</button>
-                </div>
-              </form>
-            </div>
-          </Dialog.Panel>
-        </Transition.Child>
-      </Dialog>
-    </Transition>
-  );
-};
+import { MarketViewProps } from '../types/portfolio';
 
 const MarketView: React.FC<MarketViewProps> = ({ companies, portfolio, setPortfolio }) => {
-  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+  const [shareInputs, setShareInputs] = useState<Record<string, string>>({});
 
-  const buyStock = (shares: number) => {
-    if (!selectedCompany) return;
+  const handleShareInputChange = (company: Company, value: string) => {
+    setShareInputs(prev => ({
+      ...prev,
+      [company.name]: value
+    }));
+  };
+
+  const buyStock = (company: Company) => {
+    const shares = Number(shareInputs[company.name]);
+    if (isNaN(shares) || shares <= 0) {
+      alert('Please enter a valid number of shares.');
+      return;
+    }
     
-    const cost = selectedCompany.price * shares;
+    const cost = company.price * shares;
     if (cost > portfolio.cash) {
       alert('Not enough cash!');
       return;
     }
 
     setPortfolio(prev => {
-      const existingHolding = prev.holdings.find(h => h.company.name === selectedCompany.name);
+      const existingHolding = prev.holdings.find(h => h.company.name === company.name);
       const newHoldings = existingHolding
-        ? prev.holdings.map(h => 
-            h.company.name === selectedCompany.name 
-              ? { ...h, shares: h.shares + shares }
-              : h
-          )
-        : [...prev.holdings, { company: selectedCompany, shares }];
+        ? prev.holdings.map(h => {
+            if (h.company.name === company.name) {
+              const totalShares = h.shares + shares;
+              const totalCost = (h.avgBuyPrice * h.shares) + (company.price * shares);
+              return {
+                ...h,
+                shares: totalShares,
+                avgBuyPrice: totalCost / totalShares
+              };
+            }
+            return h;
+          })
+        : [...prev.holdings, { 
+            company, 
+            shares,
+            avgBuyPrice: company.price 
+          }];
 
       return {
         cash: prev.cash - cost,
         holdings: newHoldings
       };
     });
-    setSelectedCompany(null);
+
+    // Clear the input after purchase
+    setShareInputs(prev => ({
+      ...prev,
+      [company.name]: ''
+    }));
   };
 
   const tableRowVariants = {
@@ -166,28 +123,32 @@ const MarketView: React.FC<MarketViewProps> = ({ companies, portfolio, setPortfo
                 </td>
                 <td>{(company.roe * 100).toFixed(1)}%</td>
                 <td>${company.fcf.toLocaleString()}</td>
-                <td>
-                  <motion.button 
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setSelectedCompany(company)}
-                    className="buy-button"
-                  >
-                    <BiPurchaseTag /> Buy
-                  </motion.button>
+                <td className="buy-cell">
+                  <div className="buy-control">
+                    <input
+                      type="number"
+                      min="1"
+                      className="share-input"
+                      value={shareInputs[company.name] || ''}
+                      onChange={(e) => handleShareInputChange(company, e.target.value)}
+                      placeholder="Shares"
+                    />
+                    <motion.button 
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => buyStock(company)}
+                      className="buy-button"
+                      disabled={!shareInputs[company.name]}
+                    >
+                      <BiPurchaseTag /> Buy
+                    </motion.button>
+                  </div>
                 </td>
               </motion.tr>
             ))}
           </tbody>
         </table>
       </div>
-
-      <ShareInputDialog
-        isOpen={!!selectedCompany}
-        company={selectedCompany}
-        onClose={() => setSelectedCompany(null)}
-        onConfirm={buyStock}
-      />
     </div>
   );
 };

@@ -87,8 +87,8 @@ const ReturnsView: React.FC<ReturnsViewProps> = ({ portfolio, weeklyReturns, com
   };
 
   // Calculate XIRR
-  const xirr = calculateXIRR([
-    { amount: -1000, date: new Date(2025, 0, 1) }, // Initial investment
+  const xirr = weeklyReturns.length <= 1 ? 0 : calculateXIRR([
+    { amount: -10000, date: new Date(2025, 0, 1) }, // Initial investment
     { amount: totalValue, date: new Date() },
   ]);
 
