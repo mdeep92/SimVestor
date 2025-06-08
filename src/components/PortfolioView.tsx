@@ -1,8 +1,7 @@
 import React from 'react';
-import { Company } from '../models/companies';
 import { Pie } from 'react-chartjs-2';
 import { BiTrendingUp, BiTrendingDown } from 'react-icons/bi';
-import { Portfolio, PortfolioViewProps, HoldingData } from '../types/portfolio';
+import { PortfolioViewProps, HoldingData } from '../types/portfolio';
 import {
   Chart as ChartJS,
   ArcElement,
@@ -12,7 +11,7 @@ import {
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-const PortfolioView: React.FC<PortfolioViewProps> = ({ portfolio, companies, setPortfolio }) => {
+const PortfolioView: React.FC<PortfolioViewProps> = ({ portfolio, setPortfolio }) => {
   const sellStock = (holding: HoldingData) => {
     const shares = Number(prompt(`How many shares of ${holding.company.name} do you want to sell?`));
     if (isNaN(shares) || shares <= 0 || shares > holding.shares) {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Dialog } from '@headlessui/react';
-import { BiDollar, BiTrendingUp } from 'react-icons/bi';
+// Removed unused imports
 
 interface HowToPlayProps {
   isOpen: boolean;

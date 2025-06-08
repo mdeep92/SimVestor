@@ -9,15 +9,6 @@ export type NewsItem = {
     sector?: Sector;
 };
 
-// Utility function to impact sector stocks
-const impactSector = (companies: Company[], sector: Sector, percentage: number) => {
-    companies
-        .filter(c => c.sector === sector)
-        .forEach(c => {
-            c.price = c.price * (1 + percentage);
-        });
-};
-
 // Utility functions for more complex market behaviors
 const impactSectorWithVolatility = (
     companies: Company[],

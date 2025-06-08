@@ -2,7 +2,6 @@ import React from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Pie } from 'react-chartjs-2';
 import { BiTrendingUp, BiTrendingDown, BiX, BiMedal, BiBarChart, BiDollar, BiWallet } from 'react-icons/bi';
-import { Company } from '../models/companies';
 import { HoldingData, QuarterlyReportModalProps } from '../types/portfolio';
 
 const calculatePerformanceData = (

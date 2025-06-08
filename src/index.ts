@@ -1,71 +1,64 @@
 // Entry point for Simvestor game app
+import { Company } from './models/companies';
+import { newsDatabase } from './newsDatabase';
+
 console.log('Hello, Simvestor!');
 
-// Player class to represent each player
-class Player {
-    name: string;
-    balance: number;
-
-    constructor(name: string, startingBalance: number = 10000) {
-        this.name = name;
-        this.balance = startingBalance;
-    }
-
-    invest(amount: number) {
-        if (amount > this.balance) {
-            console.log(`${this.name} does not have enough balance to invest.`);
-            return false;
-        }
-        this.balance -= amount;
-        console.log(`${this.name} invested $${amount}. Remaining balance: $${this.balance}`);
-        return true;
-    }
-
-    receive(amount: number) {
-        this.balance += amount;
-        console.log(`${this.name} received $${amount}. New balance: $${this.balance}`);
-    }
-}
-
-// Game class to manage the game state
-class Game {
-    players: Player[];
-    round: number;
-
-    constructor(playerNames: string[]) {
-        this.players = playerNames.map(name => new Player(name));
-        this.round = 1;
-    }
-
-    start() {
-        console.log('Game started!');
-        this.nextRound();
-    }
-
-    nextRound() {
-        console.log(`\n--- Round ${this.round} ---`);
-        this.players.forEach(player => {
-            // Example: Each player invests a random amount
-            const investAmount = Math.floor(Math.random() * 200) + 1;
-            player.invest(investAmount);
-        });
-        this.round++;
-        // Add more game logic here (e.g., simulate returns, check win conditions)
-    }
-}
+// Portfolio and game management code
 
 // --- MVP Feature: Fictional Companies ---
-import { Company, Sector } from './models/companies';
-
 const companies: Company[] = [
-    { name: 'TechNova', price: 100, roe: 0.15, fcf: 500000, sector: 'Technology', marketCap: 5000000, peRatio: 20, revenue: 1000000, profit: 200000, assets: 3000000, debt: 1000000, employees: 500, yearFounded: 2010 },
-    { name: 'GreenCore', price: 80, roe: 0.12, fcf: 300000, sector: 'Energy', marketCap: 4000000, peRatio: 15, revenue: 800000, profit: 150000, assets: 2500000, debt: 800000, employees: 400, yearFounded: 2012 },
-    { name: 'FinEdge', price: 120, roe: 0.18, fcf: 700000, sector: 'Finance', marketCap: 6000000, peRatio: 25, revenue: 1200000, profit: 250000, assets: 3500000, debt: 1200000, employees: 600, yearFounded: 2008 },
-    { name: 'HealthPlus', price: 90, roe: 0.10, fcf: 250000, sector: 'Healthcare', marketCap: 3500000, peRatio: 18, revenue: 900000, profit: 180000, assets: 2800000, debt: 900000, employees: 450, yearFounded: 2015 },
+    { 
+        name: 'TechNova',
+        price: 100,
+        roe: 0.15,
+        fcf: 500000,
+        sector: 'Technology',
+        marketCap: 5000000,
+        peRatio: 20,
+        revenue: 1000000,
+        profit: 200000,
+        roce: 0.18,
+        assets: 3000000,
+        debt: 1000000,
+        debtToEquity: 0.3,
+        history: [
+            {
+                year: 2024,
+                revenue: 1000000,
+                profit: 200000,
+                fcf: 500000,
+                pe: 20,
+                roi: 0.15,
+                roce: 0.18
+            },
+            {
+                year: 2023,
+                revenue: 900000,
+                profit: 180000,
+                fcf: 450000,
+                pe: 18,
+                roi: 0.14,
+                roce: 0.16
+            }
+        ],
+        background: {
+            description: "TechNova is a leading innovator in artificial intelligence and cloud computing solutions.",
+            founded: 2010,
+            headquarters: "Silicon Valley, CA",
+            employees: 500,
+            keyProducts: ["AI Platform", "Cloud Services", "Enterprise Solutions"],
+            competitors: ["CloudPeak", "ByteWorks", "DataFlow"],
+            management: {
+                ceo: "Sarah Chen",
+                cfo: "Michael Roberts"
+            }
+        }
+    },
+    // Add other companies with the same structure...
 ];
 
 // --- MVP Feature: Simulated News Feed ---
-import { newsDatabase, NewsItem } from './newsDatabase';
 
 // --- MVP Feature: Player Portfolio ---
 type PortfolioEntry = {

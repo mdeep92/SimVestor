@@ -3,7 +3,7 @@ import { Company } from '../models/companies';
 import { companies } from '../models/companies';
 import { newsDatabase } from '../newsDatabase';
 import { PriceEngine } from '../models/priceEngine';
-import { Portfolio, HoldingData } from '../types/portfolio';
+import { Portfolio } from '../types/portfolio';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BiLogOut, BiTrendingUp, BiNews, BiWallet, BiLineChart, BiRightArrowAlt, BiInfoCircle, BiFilter } from 'react-icons/bi';
 
@@ -47,7 +47,6 @@ const App: React.FC = () => {
   
   const [priceEngine] = useState(() => new PriceEngine(0.02)); // 2% base volatility
 
-  // Memoized calculation of current portfolio value and weekly change
   const { currentValue, weeklyChange } = useMemo(() => {
     const current = portfolio.cash + 
       portfolio.holdings.reduce((sum, h) => sum + (h.company.price * h.shares), 0);
@@ -67,24 +66,6 @@ const App: React.FC = () => {
     setWeek(prev => prev + 1);
   };
 
-  // Update weekly returns when week changes
-  useEffect(() => {
-    if (weeklyReturns[weeklyReturns.length - 1]?.week !== week) {
-      setWeeklyReturns(prev => [...prev, {
-        week: week,
-        value: currentValue
-      }]);
-    }
-  }, [week, currentValue, weeklyReturns]);
-
-  // Calculate average buy prices for quarterly report
-  const getHoldingsWithAvgPrice = (): HoldingData[] => {
-    return portfolio.holdings.map(holding => ({
-      ...holding,
-      avgBuyPrice: holding.avgBuyPrice || holding.company.price
-    }));
-  };
-
   useEffect(() => {
     const currentQuarter = Math.floor(week / 12);
     const previousQuarter = Math.floor(lastReportWeek / 12);
@@ -100,6 +81,15 @@ const App: React.FC = () => {
       setQuarterStartValue(currentValue);
     }
   }, [week, currentValue]);
+
+  useEffect(() => {
+    if (weeklyReturns[weeklyReturns.length - 1]?.week !== week) {
+      setWeeklyReturns(prev => [...prev, {
+        week: week,
+        value: currentValue
+      }]);
+    }
+  }, [week, currentValue, weeklyReturns]);
 
   return (
     <ProtectedRoute>
@@ -270,7 +260,10 @@ const App: React.FC = () => {
           weekNumber={week}
           portfolioValueStart={quarterStartValue}
           portfolioValueEnd={currentValue}
-          holdings={getHoldingsWithAvgPrice()}
+          holdings={portfolio.holdings.map(h => ({
+            ...h,
+            avgBuyPrice: h.avgBuyPrice || h.company.price
+          }))}
         />
       </div>
     </ProtectedRoute>

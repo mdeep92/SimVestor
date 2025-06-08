@@ -31,7 +31,6 @@ interface ReturnsViewProps {
     holdings: { company: Company; shares: number }[];
   };
   weeklyReturns: { week: number; value: number }[];
-  companies: Company[];
 }
 
 const calculateXIRR = (cashflows: { amount: number; date: Date }[]): number => {
@@ -43,7 +42,7 @@ const calculateXIRR = (cashflows: { amount: number; date: Date }[]): number => {
   return Math.pow(finalValue / Math.abs(initialValue), 1 / years) - 1;
 };
 
-const ReturnsView: React.FC<ReturnsViewProps> = ({ portfolio, weeklyReturns, companies }) => {
+const ReturnsView: React.FC<ReturnsViewProps> = ({ portfolio, weeklyReturns }) => {
   // Calculate total portfolio value
   const totalValue = portfolio.cash + 
     portfolio.holdings.reduce((sum, h) => sum + (h.company.price * h.shares), 0);

@@ -40,6 +40,8 @@ export type Company = {
   debtToEquity: number;
   history: FinancialHistory[];
   background: CompanyBackground;
+  employees?: number;
+  yearFounded?: number;
 };
 
 export const companies: Company[] = [

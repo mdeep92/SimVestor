@@ -13,7 +13,6 @@ export interface Portfolio {
 
 export interface PortfolioViewProps {
   portfolio: Portfolio;
-  companies: Company[];
   setPortfolio: React.Dispatch<React.SetStateAction<Portfolio>>;
 }
 
@@ -26,7 +25,6 @@ export interface MarketViewProps {
 export interface ReturnsViewProps {
   portfolio: Portfolio;
   weeklyReturns: { week: number; value: number }[];
-  companies: Company[];
 }
 
 export interface QuarterlyReportModalProps {

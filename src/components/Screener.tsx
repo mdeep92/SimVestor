@@ -1,14 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { Company } from '../models/companies';
-import { BiSortAlt2, BiDollar, BiTrendingUp, BiPurchaseTag } from 'react-icons/bi';
+import { BiSortAlt2, BiTrendingUp } from 'react-icons/bi';
 import { motion } from 'framer-motion';
-import { Dialog, Transition } from '@headlessui/react';
-import { Portfolio } from '../types/portfolio';
 
 interface ScreenerProps {
   companies: Company[];
-  portfolio: Portfolio;
-  setPortfolio: React.Dispatch<React.SetStateAction<Portfolio>>;
   onCompanySelect: (company: Company) => void;
 }
 
@@ -18,7 +14,7 @@ interface Filter {
   value: number;
 }
 
-const Screener: React.FC<ScreenerProps> = ({ companies, portfolio, setPortfolio, onCompanySelect }) => {
+const Screener: React.FC<ScreenerProps> = ({ companies, onCompanySelect }) => {
   const [sortConfig, setSortConfig] = useState<{
     key: keyof Company | 'peRatio' | 'marketCap' | 'debtToEquity',
     direction: 'asc' | 'desc'
